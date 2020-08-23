@@ -1,20 +1,11 @@
+#include <stdio.h>
+
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
-#include <string>
-#include <stdio.h>
+
 #include "timer.h"
-
-struct Player {
-  SDL_Texture* texture;
-  SDL_Rect src;
-  SDL_Rect dst;
-
-  int x, y, xvel, yvel;
-  float speed;
-};
-
-SDL_Texture* load_texture(SDL_Renderer* renderer, std::string path);
+#include "texture.h"
 
 int main() {
   if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -33,19 +24,24 @@ int main() {
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); //| SDL_RENDERER_PRESENTVSYNC);
   SDL_assert(renderer);
 
-  struct Player player;
-  player.texture = nullptr;
-  player.src = {0, 0, 46,31};
-  player.dst = {window_width/15 - 46/2, window_height/2 - 31/2, 46,31};
+  struct Texture player;
+  player.load_from_file(renderer, "assets/gfx/ship_white.png");
+  player.dst = {window_width/15 - player.width/2, window_height/2 - player.height/2, player.width, player.height};
   player.xvel = 0; player.yvel = 0;
   player.speed = 3;
+  
+  struct Texture enemy;
+  enemy.load_from_file(renderer, "assets/gfx/enemy_white1.png");
+  enemy.dst = {window_width - enemy.width/2, window_height/2 - enemy.height/2, enemy.width, enemy.height};
+  enemy.xvel = -1; enemy.yvel = 0;
+  enemy.speed = 2;
 
   SDL_Event event;
   bool is_running = true;
   int fps = 60;
   int ticks_per_frame = 1000 / fps;
-  struct LTimer fps_timer;
-  struct LTimer cap_timer;
+  struct Timer fps_timer;
+  struct Timer cap_timer;
   int counted_frames = 0;
   fps_timer.start();
   while(is_running) {
@@ -103,13 +99,16 @@ int main() {
     player.dst.x += player.xvel * player.speed;
     player.dst.y += player.yvel * player.speed;
 
+    enemy.dst.x += enemy.xvel * enemy.speed;
+
     // Paint the bg black
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
     // render here
-    player.texture = load_texture(renderer, "assets/gfx/ship_white.png");
-    SDL_RenderCopy(renderer, player.texture, &player.src, &player.dst);
+    player.render(renderer, player.dst.x, player.dst.y, nullptr);
+
+    enemy.render(renderer, enemy.dst.x, enemy.dst.y, nullptr);
 
     SDL_RenderPresent(renderer);
     ++counted_frames;
@@ -118,22 +117,9 @@ int main() {
       SDL_Delay(ticks_per_frame - frameticks);
     }
   }
-
   SDL_DestroyWindow(window);
   SDL_DestroyRenderer(renderer);
   SDL_Quit();
 
   return 0;
-}
-
-SDL_Texture* load_texture(SDL_Renderer* renderer, std::string path){
-  SDL_Texture* new_texture = nullptr;
-  SDL_Surface* loaded_surface = IMG_Load(path.c_str());
-  SDL_assert(loaded_surface);
-
-  new_texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);
-  SDL_assert(new_texture);
-  SDL_FreeSurface(loaded_surface);
-
-  return new_texture;
 }

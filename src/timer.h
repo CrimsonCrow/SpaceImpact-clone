@@ -6,11 +6,11 @@
 #include <cstdint>
 #include <SDL.h>
 
-struct LTimer {
+struct Timer {
   uint32_t m_start_ticks, m_paused_ticks;
   bool m_paused, m_started;
 
-  LTimer() {
+  Timer() {
     m_start_ticks = 0;
     m_paused_ticks = 0;
 

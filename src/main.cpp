@@ -99,6 +99,20 @@ int main() {
     player.dst.x += player.xvel * player.speed;
     player.dst.y += player.yvel * player.speed;
 
+    // player boundaries
+    if(player.dst.x + player.dst.w > window_width) {
+      player.dst.x = window_width - player.dst.w;
+    }
+    if(player.dst.x < 0) {
+      player.dst.x = 0;
+    }
+    if(player.dst.y + player.dst.h > window_height) {
+      player.dst.y = window_height - player.dst.h;
+    }
+    if(player.dst.y < 0) {
+      player.dst.y = 0;
+    }
+
     enemy.dst.x += enemy.xvel * enemy.speed;
 
     // Paint the bg black
@@ -119,6 +133,8 @@ int main() {
   }
   SDL_DestroyWindow(window);
   SDL_DestroyRenderer(renderer);
+
+  IMG_Quit();
   SDL_Quit();
 
   return 0;

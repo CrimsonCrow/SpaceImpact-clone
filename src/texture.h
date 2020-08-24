@@ -33,7 +33,7 @@ struct Texture {
     SDL_Texture* new_texture = nullptr;
 
     SDL_Surface* loaded_surface = IMG_Load(path.c_str());
-    //SDL_assert(loaded_surface);
+    SDL_assert(loaded_surface);
 
     //SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0, 0xFF, 0xFF));
 

@@ -123,6 +123,7 @@ int main() {
     player.render(renderer, player.dst.x, player.dst.y, nullptr);
 
     int sprite = (SDL_GetTicks() / 100) % 2;
+
     SDL_Rect e_anim = {sprite * enemy.width / 2, 0, enemy.width / 2, enemy.height};
     enemy.render(renderer, enemy.dst.x, enemy.dst.y, &e_anim);
 

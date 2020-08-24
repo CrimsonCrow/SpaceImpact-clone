@@ -31,8 +31,8 @@ int main() {
   player.speed = 3;
   
   struct Texture enemy;
-  enemy.load_from_file(renderer, "assets/gfx/enemy_white1.png");
-  enemy.dst = {window_width - enemy.width/2, window_height/2 - enemy.height/2, enemy.width, enemy.height};
+  enemy.load_from_file(renderer, "assets/gfx/space_enemy.png");
+  enemy.dst = {window_width - enemy.width/2, window_height/2 - enemy.height/2, enemy.width / 2, enemy.height};
   enemy.xvel = -1; enemy.yvel = 0;
   enemy.speed = 2;
 
@@ -122,7 +122,9 @@ int main() {
     // render here
     player.render(renderer, player.dst.x, player.dst.y, nullptr);
 
-    enemy.render(renderer, enemy.dst.x, enemy.dst.y, nullptr);
+    int sprite = (SDL_GetTicks() / 100) % 2;
+    SDL_Rect e_anim = {sprite * 46, 0, 46, 23};
+    enemy.render(renderer, enemy.dst.x, enemy.dst.y, &e_anim);
 
     SDL_RenderPresent(renderer);
     ++counted_frames;

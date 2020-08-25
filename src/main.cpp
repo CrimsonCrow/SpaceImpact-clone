@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <array>
+#include <random>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -29,12 +31,26 @@ int main() {
   player.dst = {window_width/15 - player.width/2, window_height/2 - player.height/2, player.width, player.height};
   player.xvel = 0; player.yvel = 0;
   player.speed = 3;
-  
-  struct Texture enemy;
-  enemy.load_from_file(renderer, "assets/gfx/space_enemy.png");
-  enemy.dst = {window_width - enemy.width/2, window_height/2 - enemy.height/2, enemy.width / 2, enemy.height};
-  enemy.xvel = -1; enemy.yvel = 0;
-  enemy.speed = 2;
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis_ewd(window_width+46, window_width + 1000);
+  std::uniform_int_distribution<> dis_ehg(23, window_height-23);
+
+  std::array<struct Texture, 15> enemy_container;
+  for(auto& e : enemy_container) {
+    e.load_from_file(renderer, "assets/gfx/space_enemy.png");
+    e.dst = {dis_ewd(gen), dis_ehg(gen), e.width / 2, e.height};
+    e.xvel = -1; e.yvel = 0;
+    e.speed = 4;
+  }
+
+  std::array<struct Texture, 100> p_bullets;
+  for(auto& b : p_bullets) {
+    b.load_from_file(renderer, "assets/gfx/bullet.png");
+    b.xvel = 1; b.yvel = 0;
+    b.speed = 7;
+  }
 
   SDL_Event event;
   bool is_running = true;
@@ -113,8 +129,6 @@ int main() {
       player.dst.y = 0;
     }
 
-    enemy.dst.x += enemy.xvel * enemy.speed;
-
     // Paint the bg black
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
@@ -123,17 +137,34 @@ int main() {
     player.render(renderer, player.dst.x, player.dst.y, nullptr);
 
     int sprite = (SDL_GetTicks() / 100) % 2;
+    SDL_Rect e_anim = {sprite * 46, 0, 46, 23};
+    for(auto& e : enemy_container) {
+      e.dst.x += e.xvel * e.speed;
+      if(e.dst.x < -e.width/2 || SDL_HasIntersection(&player.dst, &e.dst)) {
+        e.dst = {dis_ewd(gen), dis_ehg(gen), e.width / 2, e.height};
+      }
+      e.render(renderer, e.dst.x, e.dst.y, &e_anim);
+    }
 
-    SDL_Rect e_anim = {sprite * enemy.width / 2, 0, enemy.width / 2, enemy.height};
-    enemy.render(renderer, enemy.dst.x, enemy.dst.y, &e_anim);
+    /*
+    for(auto& b : p_bullets) {
+      b.dst.x += b.xvel * b.speed;
+      //if(event.key.keysym.sym == SDLK_SPACE) {
+        b.render(renderer, player.dst.x + 39, player.dst.y + 13, nullptr);
+      //}
+    }
+    */
+
 
     SDL_RenderPresent(renderer);
+
     ++counted_frames;
     int frameticks = cap_timer.get_ticks();
     if(frameticks < ticks_per_frame) {
       SDL_Delay(ticks_per_frame - frameticks);
     }
   }
+
   SDL_DestroyWindow(window);
   SDL_DestroyRenderer(renderer);
 

@@ -4,7 +4,7 @@
 /*  Got this code from https://lazyfoo.net/tutorials/SDL/23_advanced_timers/index.php */
 
 #include <cstdint>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 struct Timer {
   uint32_t m_start_ticks, m_paused_ticks;
